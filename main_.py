@@ -3,18 +3,34 @@ from deep_translator import GoogleTranslator
 from gtts import gTTS
 import os
 
-# Initialize the speech recognition
+audio_clips = {
+    "M1.mpeg": {'lang': 'ml', 'content': 'i ate dosa today'},
+    "M2.mpeg": {'lang': 'ml', 'content': 'its hot outside'},
+}
+
+
 recognizer = sr.Recognizer()
 
-# Capture audio from the microphone
 with sr.Microphone() as source:
     print("Listening...")
     audio = recognizer.listen(source)
 
-# Recognize the speech
 try:
     recognized_text = recognizer.recognize_google(audio)
     print("Recognized Text:", recognized_text)
+
+    for filename, clip_data in audio_clips.items():
+        try:
+
+            if clip_data['content'] == str.lower(recognized_text):
+                os.system("start " + filename)
+            else:
+                print("Recognized text differs from existing content.")
+
+        except sr.UnknownValueError:
+            pass
+    # os.system("start M1.mpeg")
+
 except sr.UnknownValueError:
     print("Google Speech Recognition could not understand audio")
     exit()
@@ -31,7 +47,7 @@ print("Translated Text:", translated_text)
 # Convert the translated text to speech
 tts = gTTS(text=translated_text, lang=output_lang_code)
 tts.save("output.mp3")
-os.system("start output.mp3")  # This command may vary depending on your OS
+# os.system("start output.mp3")  # This command may vary depending on your OS
 
 
 # import os
