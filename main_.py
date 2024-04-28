@@ -50,6 +50,36 @@ tts.save("output.mp3")
 # os.system("start output.mp3")  # This command may vary depending on your OS
 
 
+# use this to dynamically create audio clip mapping
+# usage my_audio_directory = "path/to/your/audio/files"  # Replace with your directory
+# mapping = process_audio_directory(my_audio_directory) 
+
+def process_audio_directory(directory_path):
+    audio_clips = {}
+    recognizer = sr.Recognizer()
+    for filename in os.listdir(directory_path):
+        if filename.endswith(".mp3"):
+            filepath = os.path.join(directory_path, filename)
+
+            with sr.AudioFile(filepath) as source:
+                audio = recognizer.record(source)
+
+            try:
+                recognized_text = recognizer.recognize_google(audio)
+                detected_lang = GoogleTranslator().detect(recognized_text)[0]
+                if detected_lang != 'en':
+                    recognized_text = GoogleTranslator(source=detected_lang, target='en').translate(recognized_text)
+
+                audio_clips[filepath] = recognized_text
+
+            except sr.UnknownValueError:
+                print(f"Audio in {filename} could not be understood")
+            except sr.RequestError as e:
+                print(f"Could not process audio in {filename}; {e}")
+    return audio_clips
+
+
+
 # import os
 # import threading
 # import tkinter as tk
